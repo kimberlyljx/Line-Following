@@ -86,22 +86,30 @@ void loop()
   
   lcd.clear();
   lcd.print(position);
-  delay(50);
   int base_position = 2000;
   int error = base_position - position;
-  int base_speed = 150;
+  int base_speed = 80;
+  error = error * 0.05; // error is proportional
+  int Lspd = base_speed-error;
+  int Rspd = base_speed+error;
+  motors.setSpeeds(Lspd, Rspd);
+  delay(10);
+  int prev_error = error;  
+  position = robot.readLine(sensors, IR_EMITTERS_ON);
+  error = base_position - position; 
+  error = error * 0.05;
+  int derivative = prev_error - error;
+  Lspd = base_speed-error-derivative;
+  Rspd = base_speed+error+derivative;
+  motors.setSpeeds(Lspd, Rspd);
   
-  # speed = base + kp* error (+/-) kd*prev_error
+  // speed = base + kp* error (+/-) kd*prev_error
+  
   //error has a max of ±2000
   //2000 * 0.05 = 100, therefore
   //the maximum speed possible
   //is 250, and 250 < 255,
   //so we use a scalar of 0.
-  
-  error = error * 0.05;
-  int Lspd = base_speed+error;
-  int Rspd = base_speed-error;
-  motors.setSpeeds(Lspd, Rspd);
-   
-//  int derivative = position - last_proportional;
+
+
 }
